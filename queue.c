@@ -25,9 +25,8 @@ struct list_head *q_new()
 void q_free(struct list_head *head)
 {
     struct list_head *pos, *n;
-    list_for_each_safe (pos, n, head) {
+    list_for_each_safe (pos, n, head)
         free(pos);
-    }
     free(head);
 }
 
