@@ -25,6 +25,7 @@
     return true;
 
 
+
 /* Create an empty queue */
 struct list_head *q_new()
 {
@@ -63,7 +64,15 @@ bool q_insert_tail(struct list_head *head, char *s)
 /* Remove an element from head of queue */
 element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    if (!head || list_empty(head))
+        return NULL;
+    element_t *cur_elem = list_entry(head, element_t, list);
+    if (cur_elem && sp) {
+        strncpy(sp, cur_elem->value, bufsize);
+        sp[bufsize - 1] = '\0';
+    }
+    list_del(&cur_elem->list);
+    return cur_elem;
 }
 
 /* Remove an element from tail of queue */
