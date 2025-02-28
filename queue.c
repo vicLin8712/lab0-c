@@ -9,6 +9,21 @@
  * following line.
  *   cppcheck-suppress nullPointer
  */
+#define q_insert_new(to, s)                                            \
+    if (!to)                                                           \
+        return false;                                                  \
+    element_t *new = test_malloc(sizeof(element_t));                   \
+    if (!new)                                                          \
+        return false;                                                  \
+    new->value = (char *) test_malloc((strlen(s) + 1) * sizeof(char)); \
+    if (!new->value) {                                                 \
+        q_release_element(new);                                        \
+        return false;                                                  \
+    }                                                                  \
+    strncpy(new->value, s, strlen(s) + 1);                             \
+    list_add(&new->list, to);                                          \
+    test_free(s);                                                      \
+    return true;
 
 
 /* Create an empty queue */
@@ -24,22 +39,26 @@ struct list_head *q_new()
 /* Free all storage used by queue */
 void q_free(struct list_head *head)
 {
-    struct list_head *pos, *n;
-    list_for_each_safe (pos, n, head)
-        free(pos);
+    if (!head)
+        return;
+    element_t *entry, *safe;
+    list_for_each_entry_safe (entry, safe, head, list) {
+        q_release_element(entry);
+    }
     free(head);
 }
 
 /* Insert an element at head of queue */
 bool q_insert_head(struct list_head *head, char *s)
 {
-    return true;
+    q_insert_new(head, s);
 }
 
 /* Insert an element at tail of queue */
 bool q_insert_tail(struct list_head *head, char *s)
 {
-    return true;
+    struct list_head *prev = head->prev;
+    q_insert_new(prev, s);
 }
 
 /* Remove an element from head of queue */
@@ -57,7 +76,15 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 /* Return number of elements in queue */
 int q_size(struct list_head *head)
 {
-    return -1;
+    if (!head)
+        return 0;
+
+    int len = 0;
+    struct list_head *li;
+
+    list_for_each (li, head)
+        len++;
+    return len;
 }
 
 /* Delete the middle node in queue */
