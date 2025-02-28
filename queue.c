@@ -22,7 +22,6 @@
     }                                                                  \
     strncpy(new->value, s, strlen(s) + 1);                             \
     list_add(&new->list, to);                                          \
-    test_free(s);                                                      \
     return true;
 
 
