@@ -9,8 +9,8 @@
  * following line.
  *   cppcheck-suppress nullPointer
  */
-#define q_insert_new(to, s)                                            \
-    if (!to)                                                           \
+#define q_insert_new(head, s, pos)                                     \
+    if (!head)                                                         \
         return false;                                                  \
     element_t *new = test_malloc(sizeof(element_t));                   \
     if (!new)                                                          \
@@ -21,7 +21,8 @@
         return false;                                                  \
     }                                                                  \
     strncpy(new->value, s, strlen(s) + 1);                             \
-    list_add(&new->list, to);                                          \
+    !strcmp(pos, "head") ? list_add(&new->list, head)                  \
+                         : list_add_tail(&new->list, head);            \
     return true;
 
 
@@ -66,14 +67,14 @@ void q_free(struct list_head *head)
 /* Insert an element at head of queue */
 bool q_insert_head(struct list_head *head, char *s)
 {
-    q_insert_new(head, s);
+    q_insert_new(head, s, "head");
 }
 
 /* Insert an element at tail of queue */
 bool q_insert_tail(struct list_head *head, char *s)
 {
     struct list_head *prev = head->prev;
-    q_insert_new(prev, s);
+    q_insert_new(prev, s, "tail");
 }
 
 /* Remove an element from head of queue */
