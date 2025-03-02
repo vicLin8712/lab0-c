@@ -42,6 +42,10 @@
     }                                                                     \
     return cur_elem;
 
+#define elem_del(elem)     \
+    list_del(&elem->list); \
+    q_release_element(elem);
+
 /* Create an empty queue */
 struct list_head *q_new()
 {
@@ -124,6 +128,21 @@ bool q_delete_mid(struct list_head *head)
 bool q_delete_dup(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
+    if (!head || list_empty(head))
+        return NULL;
+    element_t *entry, *safe;
+    bool dup = false;
+    list_for_each_entry_safe (entry, safe, head, list) {
+        if (entry->list.next != head &&
+            !strcmp(entry->value,
+                    list_entry(entry->list.next, element_t, list)->value)) {
+            dup = true;
+            elem_del(entry);
+        } else if (dup) {
+            elem_del(entry);
+            dup = false;
+        }
+    }
     return true;
 }
 
