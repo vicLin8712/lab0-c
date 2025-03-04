@@ -30,10 +30,9 @@
     if (!head || list_empty(head)) {                                      \
         return NULL;                                                      \
     }                                                                     \
-    element_t *cur_elem =                                                 \
-        (strcmp(pos, "head"))   ? list_first_entry(head, element_t, list) \
-        : (strcmp(pos, "tail")) ? list_last_entry(head, element_t, list)  \
-                                : NULL;                                   \
+    element_t *cur_elem = (!strcmp(pos, "head"))                          \
+                              ? (list_first_entry(head, element_t, list)) \
+                              : (list_last_entry(head, element_t, list)); \
     list_del(&cur_elem->list);                                            \
     if (cur_elem && sp) {                                                 \
         size_t temp = strlen(cur_elem->value);                            \
@@ -171,6 +170,25 @@ void q_reverse(struct list_head *head)
 void q_reverseK(struct list_head *head, int k)
 {
     // https://leetcode.com/problems/reverse-nodes-in-k-group/
+    if (!head || list_empty(head) || k <= 1)
+        return;
+    if (k == 2) {
+        q_swap(head);
+        return;
+    }
+    struct list_head *dummy_head, *dummy_end, *safe;
+    struct list_head temp;
+    int count = k - 1;
+    for (dummy_end = (head)->next, safe = dummy_end->next, dummy_head = head;
+         dummy_end != head; dummy_end = safe, safe = dummy_end->next, --count) {
+        if (count == 0) {
+            list_cut_position(&temp, dummy_head, dummy_end);
+            q_reverse(&temp);
+            list_splice_init(&temp, dummy_head);
+            dummy_head = safe->prev;
+            count = k;
+        }
+    }
 }
 
 /* Sort elements of queue in ascending/descending order */
