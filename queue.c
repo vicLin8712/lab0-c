@@ -76,8 +76,7 @@ bool q_insert_head(struct list_head *head, char *s)
 /* Insert an element at tail of queue */
 bool q_insert_tail(struct list_head *head, char *s)
 {
-    struct list_head *prev = head->prev;
-    q_insert_new(prev, s, "tail");
+    q_insert_new(head, s, "tail");
 }
 
 /* Remove an element from head of queue */
@@ -111,12 +110,12 @@ bool q_delete_mid(struct list_head *head)
 {
     if (!head || list_is_singular(head))
         return NULL;
-    struct list_head **indir = &head, *fast = head;
+    struct list_head *indir = head, *fast = indir->next;
 
     for (; fast->next != head && fast->next->next != head;
          fast = fast->next->next)
-        indir = &(*indir)->next;
-    struct list_head *del = *indir;
+        indir = indir->next;
+    struct list_head *del = indir->next;
     list_del(del);
     q_release_element(list_entry(del, element_t, list));
     // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
