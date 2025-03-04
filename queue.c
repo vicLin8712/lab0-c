@@ -190,9 +190,45 @@ void q_reverseK(struct list_head *head, int k)
     }
 }
 
-/* Sort elements of queue in ascending/descending order */
-void q_sort(struct list_head *head, bool descend) {}
 
+void merge(struct list_head *head,
+           struct list_head *left,
+           struct list_head *right,
+           bool descend)
+{
+    while (!list_empty(left) && !list_empty(right)) {
+        element_t const *l = list_entry(left->next, element_t, list);
+        element_t const *r = list_entry(right->next, element_t, list);
+        if (((descend * 2) - 1) * strcmp(l->value, r->value) >= 0) {
+            list_move_tail(left->next, head);
+        } else {
+            list_move_tail(right->next, head);
+        }
+    }
+    if (!list_empty(left))
+        list_splice_tail(left, head);
+    else
+        list_splice_tail(right, head);
+}
+/* Sort elements of queue in ascending/descending order */
+void q_sort(struct list_head *head, bool descend)
+{
+    if (!head || list_empty(head) || list_is_singular(head))
+        return;
+    struct list_head *slow = head->next, *fast = head->next->next;
+    while (fast != head && fast->next != head) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    struct list_head l, r;
+    INIT_LIST_HEAD(&l);
+    INIT_LIST_HEAD(&r);
+    list_cut_position(&l, head, slow);
+    list_splice_init(head, &r);
+    q_sort(&l, descend);
+    q_sort(&r, descend);
+    merge(head, &l, &r, descend);
+}
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */
 int q_ascend(struct list_head *head)
@@ -214,5 +250,6 @@ int q_descend(struct list_head *head)
 int q_merge(struct list_head *head, bool descend)
 {
     // https://leetcode.com/problems/merge-k-sorted-lists/
+
     return 0;
 }
